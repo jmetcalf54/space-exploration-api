@@ -1,10 +1,10 @@
 package com.example.demo.model;
 
-public abstract class ObjectsNearEarth {
+public abstract class NearEarthObjects {
     private String officialName;
     private double distanceFromEarth;
 
-    protected ObjectsNearEarth(String officialName, double distanceFromEarth) {
+    protected NearEarthObjects(String officialName, double distanceFromEarth) {
         this.officialName = officialName;
         this.distanceFromEarth = distanceFromEarth;
     }

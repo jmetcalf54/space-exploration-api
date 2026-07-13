@@ -11,7 +11,7 @@ public class DemoApplication {
 		System.out.println("Starting the application...");
 		SpringApplication.run(DemoApplication.class, args);
 
-		Comet hailey = new Comet("Hailey's", 100.00);
+		Comet hailey = new Comet("Hailey's", 100.00, "Long");
 
 		System.out.print("The distance is " + hailey.getDistanceFromEarth() + 
 		", and the name is " + hailey.getOfficialName());
