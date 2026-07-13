@@ -35,4 +35,27 @@ public class SpaceObjectService {
 
         return allSpaceObjects;
     }
+
+    public NearEarthObjects returnClosestSpaceObject() {
+        List<NearEarthObjects> allSpaceObjects = returnAllSpaceObjects();
+        NearEarthObjects closest = allSpaceObjects.get(0);
+        for (NearEarthObjects obj : allSpaceObjects) {
+            if (obj.getDistanceFromEarth() < closest.getDistanceFromEarth()) {
+                closest = obj;
+            }
+        }
+        return closest;
+    }
+
+    public List<Asteroid> returnAsteroidsByThreatLevel(int level) {
+        return returnAsteroids().stream()
+                .filter(asteroid -> asteroid.getThreatLevel() == level)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public List<Asteroid> returnMinThreatLevelAsteroids(int level) {
+        return returnAsteroids().stream()
+                .filter(asteroid -> asteroid.getThreatLevel() >= level)
+                .collect(java.util.stream.Collectors.toList());
+    }
 }

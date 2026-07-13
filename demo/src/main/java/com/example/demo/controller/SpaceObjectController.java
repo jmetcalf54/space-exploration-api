@@ -2,6 +2,9 @@ package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.service.SpaceObjectService;
 import com.example.demo.model.Comet;
@@ -25,12 +28,26 @@ public class SpaceObjectController {
     }
 
     @GetMapping("/asteroids")
-    public List<Asteroid> asteroidsAPI(){
+    public List<Asteroid> asteroidsAPI(
+    @RequestParam(name = "minThreatLevel", required = false) Integer minThreatLevel) {
+        if (minThreatLevel != null) {
+            return spaceObjectService.returnMinThreatLevelAsteroids(minThreatLevel);
+        }
         return spaceObjectService.returnAsteroids();
     }
 
     @GetMapping("/near-earth-objects")
     public List<NearEarthObjects> spaceObjectsAPI(){
         return spaceObjectService.returnAllSpaceObjects();
+    }
+
+    @GetMapping("/near-earth-objects/closest")
+    public NearEarthObjects closestSpaceObjectAPI(){
+        return spaceObjectService.returnClosestSpaceObject();
+    }
+
+    @GetMapping("/asteroids/threat/{level}")
+    public List<Asteroid> asteroidsByThreatLevelAPI(@PathVariable int level){
+        return spaceObjectService.returnAsteroidsByThreatLevel(level);
     }
 }
