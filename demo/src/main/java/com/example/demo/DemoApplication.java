@@ -8,7 +8,11 @@ public class DemoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
-		System.out.print("Hello World!");
+
+		Comet hailey = new Comet("Hailey's", 100.00);
+
+		System.out.print("The distance is " + hailey.getDistanceFromEarth() + 
+		", and the name is " + hailey.getOfficialName());
 	}
 
 }
