@@ -6,4 +6,8 @@ class Comet extends ObjectsNearEarth {
         super(officialName, distanceFromEarth);
     }
 
+    @Override
+    public String getObjectType(){
+        return "Comet";
+    }
 }
