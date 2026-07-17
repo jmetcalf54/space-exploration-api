@@ -1,10 +1,12 @@
 package com.example.demo.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.NearEarthObjects;
+import com.example.demo.dto.NearEarthObjectResponse;
 import com.example.demo.model.Asteroid;
 import com.example.demo.model.Comet;
 
@@ -27,11 +29,11 @@ public class SpaceObjectService {
 
     public List<NearEarthObjects> returnAllSpaceObjects() {
         List<Comet> comets = returnComets();
-        List<Asteroid> asteriods = returnAsteroids();
+        List<Asteroid> asteroids = returnAsteroids();
 
         List<NearEarthObjects> allSpaceObjects = new java.util.ArrayList<>();
         allSpaceObjects.addAll(comets);
-        allSpaceObjects.addAll(asteriods);
+        allSpaceObjects.addAll(asteroids);
 
         return allSpaceObjects;
     }
@@ -57,5 +59,15 @@ public class SpaceObjectService {
         return returnAsteroids().stream()
                 .filter(asteroid -> asteroid.getThreatLevel() >= level)
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    public List<NearEarthObjectResponse> returnAllSpaceObjectsAsResponse() {
+        List<NearEarthObjects> spaceObjects = returnAllSpaceObjects();
+        List<NearEarthObjectResponse> responses = new ArrayList<>();
+        for (NearEarthObjects spaceObject : spaceObjects) {
+            NearEarthObjectResponse response = new NearEarthObjectResponse(spaceObject);
+            responses.add(response);
+        }
+        return responses;
     }
 }

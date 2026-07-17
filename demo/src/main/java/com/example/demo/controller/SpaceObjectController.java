@@ -11,7 +11,6 @@ import com.example.demo.model.Asteroid;
 import com.example.demo.model.NearEarthObjects;
 import com.example.demo.dto.NearEarthObjectResponse;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -39,13 +38,7 @@ public class SpaceObjectController {
 
     @GetMapping("/near-earth-objects")
     public List<NearEarthObjectResponse> spaceObjectsAPI(){
-        List<NearEarthObjects> spaceObjects = spaceObjectService.returnAllSpaceObjects();
-        List<NearEarthObjectResponse> responses = new ArrayList<>();
-        for (NearEarthObjects spaceObject : spaceObjects) {
-            NearEarthObjectResponse response = new NearEarthObjectResponse(spaceObject);
-            responses.add(response);
-        }
-        return responses;
+        return spaceObjectService.returnAllSpaceObjectsAsResponse();
     }
 
     @GetMapping("/near-earth-objects/closest")

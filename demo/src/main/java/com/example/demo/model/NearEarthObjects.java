@@ -2,9 +2,9 @@ package com.example.demo.model;
 
 public abstract class NearEarthObjects {
     private String officialName;
-    private double distanceFromEarth;
+    private Double distanceFromEarth;
 
-    protected NearEarthObjects(String officialName, double distanceFromEarth) {
+    protected NearEarthObjects(String officialName, Double distanceFromEarth) {
         this.officialName = officialName;
         this.distanceFromEarth = distanceFromEarth;
     }
@@ -17,11 +17,11 @@ public abstract class NearEarthObjects {
         this.officialName = officialName;
     }
 
-    public double getDistanceFromEarth() {
+    public Double getDistanceFromEarth() {
         return distanceFromEarth;
     }
 
-    public void setDistanceFromEarth(double distanceFromEarth) {
+    public void setDistanceFromEarth(Double distanceFromEarth) {
         this.distanceFromEarth = distanceFromEarth;
     }
 
