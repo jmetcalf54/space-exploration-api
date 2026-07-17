@@ -38,6 +38,16 @@ public class SpaceObjectService {
         return allSpaceObjects;
     }
 
+    public List<NearEarthObjectResponse> returnAllSpaceObjectsAsResponse() {
+        List<NearEarthObjects> spaceObjects = returnAllSpaceObjects();
+        List<NearEarthObjectResponse> responses = new ArrayList<>();
+        for (NearEarthObjects spaceObject : spaceObjects) {
+            NearEarthObjectResponse response = new NearEarthObjectResponse(spaceObject);
+            responses.add(response);
+        }
+        return responses;
+    }
+
     public NearEarthObjects returnClosestSpaceObject() {
         List<NearEarthObjects> allSpaceObjects = returnAllSpaceObjects();
         NearEarthObjects closest = allSpaceObjects.get(0);
@@ -47,6 +57,12 @@ public class SpaceObjectService {
             }
         }
         return closest;
+    }
+
+    public NearEarthObjectResponse returnClosestSpaceObjectAsResponse() {
+        NearEarthObjects closest = returnClosestSpaceObject();
+        NearEarthObjectResponse response = new NearEarthObjectResponse(closest);
+        return response;
     }
 
     public List<Asteroid> returnAsteroidsByThreatLevel(int level) {
@@ -59,15 +75,5 @@ public class SpaceObjectService {
         return returnAsteroids().stream()
                 .filter(asteroid -> asteroid.getThreatLevel() >= level)
                 .collect(java.util.stream.Collectors.toList());
-    }
-
-    public List<NearEarthObjectResponse> returnAllSpaceObjectsAsResponse() {
-        List<NearEarthObjects> spaceObjects = returnAllSpaceObjects();
-        List<NearEarthObjectResponse> responses = new ArrayList<>();
-        for (NearEarthObjects spaceObject : spaceObjects) {
-            NearEarthObjectResponse response = new NearEarthObjectResponse(spaceObject);
-            responses.add(response);
-        }
-        return responses;
     }
 }

@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.example.demo.service.SpaceObjectService;
 import com.example.demo.model.Comet;
 import com.example.demo.model.Asteroid;
-import com.example.demo.model.NearEarthObjects;
 import com.example.demo.dto.NearEarthObjectResponse;
 
 import java.util.List;
@@ -42,8 +41,8 @@ public class SpaceObjectController {
     }
 
     @GetMapping("/near-earth-objects/closest")
-    public NearEarthObjects closestSpaceObjectAPI(){
-        return spaceObjectService.returnClosestSpaceObject();
+    public NearEarthObjectResponse closestSpaceObjectAPI(){
+        return spaceObjectService.returnClosestSpaceObjectAsResponse();
     }
 
     @GetMapping("/asteroids/threat/{level}")
