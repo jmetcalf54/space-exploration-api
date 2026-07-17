@@ -5,12 +5,12 @@ import com.example.demo.model.NearEarthObjects;
 public class NearEarthObjectResponse {
     private String name;
     private String objectType;
-    private String distanceFromEarth;
+    private Double distanceFromEarth;
 
     public NearEarthObjectResponse(NearEarthObjects nearEarthObject) {
         this.name = nearEarthObject.getOfficialName();
         this.objectType = nearEarthObject.getObjectType();
-        this.distanceFromEarth = String.valueOf(nearEarthObject.getDistanceFromEarth());
+        this.distanceFromEarth = nearEarthObject.getDistanceFromEarth();
     }
 
     public String getName() {
@@ -21,7 +21,7 @@ public class NearEarthObjectResponse {
         return objectType;
     }
 
-    public String getDistanceFromEarth() {
+    public Double getDistanceFromEarth() {
         return distanceFromEarth;
     }
 
