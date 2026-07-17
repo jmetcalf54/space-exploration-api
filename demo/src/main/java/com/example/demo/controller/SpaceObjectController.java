@@ -3,14 +3,15 @@ package com.example.demo.controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.service.SpaceObjectService;
 import com.example.demo.model.Comet;
 import com.example.demo.model.Asteroid;
 import com.example.demo.model.NearEarthObjects;
+import com.example.demo.dto.NearEarthObjectResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -37,8 +38,14 @@ public class SpaceObjectController {
     }
 
     @GetMapping("/near-earth-objects")
-    public List<NearEarthObjects> spaceObjectsAPI(){
-        return spaceObjectService.returnAllSpaceObjects();
+    public List<NearEarthObjectResponse> spaceObjectsAPI(){
+        List<NearEarthObjects> spaceObjects = spaceObjectService.returnAllSpaceObjects();
+        List<NearEarthObjectResponse> responses = new ArrayList<>();
+        for (NearEarthObjects spaceObject : spaceObjects) {
+            NearEarthObjectResponse response = new NearEarthObjectResponse(spaceObject);
+            responses.add(response);
+        }
+        return responses;
     }
 
     @GetMapping("/near-earth-objects/closest")
