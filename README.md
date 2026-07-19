@@ -81,6 +81,14 @@ From the `demo` directory:
 .\mvnw.cmd spring-boot:run
 ```
 
+## API Documentation
+
+Swagger UI is available locally after starting the app:
+
+```text
+http://localhost:8080/swagger-ui/index.html
+```
+
 ## Roadmap
 
 Planned next steps:
@@ -90,4 +98,3 @@ Planned next steps:
 - Add external NASA API integration
 - Add database persistence
 - Add tests for service and controller logic
-- Add Swagger/OpenAPI documentation
