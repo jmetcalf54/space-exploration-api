@@ -21,12 +21,12 @@ public class SpaceObjectController {
         this.spaceObjectService = spaceObjectService;
     }
 
-    @GetMapping("/comets")
+    @GetMapping("/api/comets")
     public List<Comet> cometsAPI(){
         return spaceObjectService.returnComets();
     }
 
-    @GetMapping("/asteroids")
+    @GetMapping("/api/asteroids")
     public List<Asteroid> asteroidsAPI(
     @RequestParam(name = "minThreatLevel", required = false) Integer minThreatLevel) {
         if (minThreatLevel != null) {
@@ -35,17 +35,17 @@ public class SpaceObjectController {
         return spaceObjectService.returnAsteroids();
     }
 
-    @GetMapping("/near-earth-objects")
+    @GetMapping("/api/near-earth-objects")
     public List<NearEarthObjectResponse> spaceObjectsAPI(){
         return spaceObjectService.returnAllSpaceObjectsAsResponse();
     }
 
-    @GetMapping("/near-earth-objects/closest")
+    @GetMapping("/api/near-earth-objects/closest")
     public NearEarthObjectResponse closestSpaceObjectAPI(){
         return spaceObjectService.returnClosestSpaceObjectAsResponse();
     }
 
-    @GetMapping("/asteroids/threat/{level}")
+    @GetMapping("/api/asteroids/threat/{level}")
     public List<Asteroid> asteroidsByThreatLevelAPI(@PathVariable int level){
         return spaceObjectService.returnAsteroidsByThreatLevel(level);
     }
