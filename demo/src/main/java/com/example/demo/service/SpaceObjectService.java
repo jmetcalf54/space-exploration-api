@@ -66,12 +66,18 @@ public class SpaceObjectService {
     }
 
     public List<Asteroid> returnAsteroidsByThreatLevel(int level) {
+        if (level < 1 || level > 5) {
+            throw new IllegalArgumentException("Threat level must be between 1 and 5.");
+        }
         return returnAsteroids().stream()
                 .filter(asteroid -> asteroid.getThreatLevel() == level)
                 .collect(java.util.stream.Collectors.toList());
     }
 
     public List<Asteroid> returnMinThreatLevelAsteroids(int level) {
+        if (level < 1 || level > 5) {
+            throw new IllegalArgumentException("Threat level must be between 1 and 5.");
+        }
         return returnAsteroids().stream()
                 .filter(asteroid -> asteroid.getThreatLevel() >= level)
                 .collect(java.util.stream.Collectors.toList());
