@@ -21,7 +21,6 @@ public class SpaceObjectServiceTest {
 
     @Test 
     void testThreatLevelFiltering() {
-        // Implement test logic for threat level filtering
         List<Asteroid> result =
             spaceObjectService.returnAsteroidsByThreatLevel(2);
 
@@ -31,7 +30,6 @@ public class SpaceObjectServiceTest {
 
     @Test
     void testMinimumThreatLevelFiltering() {
-        // Implement test logic for minimum threat level filtering
         List<Asteroid> result = 
             spaceObjectService.returnMinThreatLevelAsteroids(1);
         
@@ -41,7 +39,6 @@ public class SpaceObjectServiceTest {
 
     @Test
     void testThreatLevelFilteringWithInvalidInput() {
-        // Implement test logic for invalid input handling
         assertThrows(IllegalArgumentException.class, () -> {
             spaceObjectService.returnAsteroidsByThreatLevel(-1);
         });
@@ -49,7 +46,6 @@ public class SpaceObjectServiceTest {
 
     @Test
     void testClosestSpaceObject() {
-        // Implement test logic for closest space object retrieval
         NearEarthObjects result = 
             spaceObjectService.returnClosestSpaceObject();
         assertEquals(100.0, result.getDistanceFromEarth());
