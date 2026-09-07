@@ -54,5 +54,4 @@ public class SpaceObjectServiceTest {
             spaceObjectService.returnClosestSpaceObject();
         assertEquals(100.0, result.getDistanceFromEarth());
     }
-
 }
