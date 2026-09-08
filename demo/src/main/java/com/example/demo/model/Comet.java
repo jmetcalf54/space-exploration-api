@@ -1,6 +1,6 @@
 package com.example.demo.model;
 
-public class Comet extends NearEarthObjects {
+public class Comet extends NearEarthObject {
     private String tailLength;
 
     public Comet(String officialName, Double distanceFromEarth, String tailLength){

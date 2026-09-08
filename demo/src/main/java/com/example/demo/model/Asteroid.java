@@ -1,6 +1,6 @@
 package com.example.demo.model;
 
-public class Asteroid extends NearEarthObjects {
+public class Asteroid extends NearEarthObject {
     private int threatLevel;
 
     public Asteroid(String officialName, Double distanceFromEarth, int threatLevel){

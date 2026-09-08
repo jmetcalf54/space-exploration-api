@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.demo.model.NearEarthObjects;
+import com.example.demo.model.NearEarthObject;
 import com.example.demo.dto.NearEarthObjectResponse;
 import com.example.demo.model.Asteroid;
 import com.example.demo.model.Comet;
@@ -27,11 +27,11 @@ public class SpaceObjectService {
         );
     }
 
-    public List<NearEarthObjects> returnAllSpaceObjects() {
+    public List<NearEarthObject> returnAllSpaceObjects() {
         List<Comet> comets = returnComets();
         List<Asteroid> asteroids = returnAsteroids();
 
-        List<NearEarthObjects> allSpaceObjects = new java.util.ArrayList<>();
+        List<NearEarthObject> allSpaceObjects = new java.util.ArrayList<>();
         allSpaceObjects.addAll(comets);
         allSpaceObjects.addAll(asteroids);
 
@@ -39,19 +39,19 @@ public class SpaceObjectService {
     }
 
     public List<NearEarthObjectResponse> returnAllSpaceObjectsAsResponse() {
-        List<NearEarthObjects> spaceObjects = returnAllSpaceObjects();
+        List<NearEarthObject> spaceObjects = returnAllSpaceObjects();
         List<NearEarthObjectResponse> responses = new ArrayList<>();
-        for (NearEarthObjects spaceObject : spaceObjects) {
+        for (NearEarthObject spaceObject : spaceObjects) {
             NearEarthObjectResponse response = new NearEarthObjectResponse(spaceObject);
             responses.add(response);
         }
         return responses;
     }
 
-    public NearEarthObjects returnClosestSpaceObject() {
-        List<NearEarthObjects> allSpaceObjects = returnAllSpaceObjects();
-        NearEarthObjects closest = allSpaceObjects.get(0);
-        for (NearEarthObjects obj : allSpaceObjects) {
+    public NearEarthObject returnClosestSpaceObject() {
+        List<NearEarthObject> allSpaceObjects = returnAllSpaceObjects();
+        NearEarthObject closest = allSpaceObjects.get(0);
+        for (NearEarthObject obj : allSpaceObjects) {
             if (obj.getDistanceFromEarth() < closest.getDistanceFromEarth()) {
                 closest = obj;
             }
@@ -60,7 +60,7 @@ public class SpaceObjectService {
     }
 
     public NearEarthObjectResponse returnClosestSpaceObjectAsResponse() {
-        NearEarthObjects closest = returnClosestSpaceObject();
+        NearEarthObject closest = returnClosestSpaceObject();
         NearEarthObjectResponse response = new NearEarthObjectResponse(closest);
         return response;
     }

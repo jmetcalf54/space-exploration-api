@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.example.demo.model.Asteroid;
-import com.example.demo.model.NearEarthObjects;
+import com.example.demo.model.NearEarthObject;
 
 
 public class SpaceObjectServiceTest {
@@ -46,7 +46,7 @@ public class SpaceObjectServiceTest {
 
     @Test
     void testClosestSpaceObject() {
-        NearEarthObjects result = 
+        NearEarthObject result = 
             spaceObjectService.returnClosestSpaceObject();
         assertEquals(100.0, result.getDistanceFromEarth());
     }
