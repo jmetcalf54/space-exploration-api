@@ -1,8 +1,14 @@
 package com.example.demo.model;
 
+import jakarta.persistence.MappedSuperclass;
+
+@MappedSuperclass
 public abstract class NearEarthObject {
     private String officialName;
     private Double distanceFromEarth;
+
+    protected NearEarthObject() {
+    }
 
     protected NearEarthObject(String officialName, Double distanceFromEarth) {
         this.officialName = officialName;

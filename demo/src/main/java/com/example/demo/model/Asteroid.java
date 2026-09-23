@@ -14,6 +14,9 @@ public class Asteroid extends NearEarthObject {
     @GeneratedValue
     private Long id;
 
+    protected Asteroid() {
+    }
+
     public Asteroid(String officialName, Double distanceFromEarth, int threatLevel){
         super(officialName, distanceFromEarth);
         this.threatLevel = threatLevel;
