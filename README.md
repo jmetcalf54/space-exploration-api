@@ -22,6 +22,9 @@ The long-term goal is to integrate real external space data, likely through NASA
 - Swagger / OpenAPI documentation
 - Health endpoint
 - JUnit service-layer tests
+- Spring Data JPA repository layer
+- H2-backed asteroid persistence
+- Startup data seeding for asteroid records
 
 ## Tech Stack
 
@@ -29,6 +32,8 @@ The long-term goal is to integrate real external space data, likely through NASA
 - Spring Boot 4.x
 - Maven
 - JUnit 5
+- Spring Data JPA
+- H2 Database
 - Swagger / OpenAPI
 - VS Code
 
@@ -38,7 +43,7 @@ The long-term goal is to integrate real external space data, likely through NASA
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
-| GET | `/api/health` | Confirms that the API is running |
+| GET | `/health` | Confirms that the API is running |
 
 ### Comets and Asteroids
 
@@ -127,15 +132,19 @@ src
 │                   ├── controller
 │                   │   ├── SpaceObjectController.java
 │                   │   └── ...
+│                   ├── data
+│                   │   └── DataSeeder.java
 │                   ├── dto
 │                   │   ├── NearEarthObjectResponse.java
 │                   │   └── ApiErrorResponse.java
 │                   ├── exception
 │                   │   └── GlobalExceptionHandler.java
 │                   ├── model
-│                   │   ├── NearEarthObjects.java
+│                   │   ├── NearEarthObject.java
 │                   │   ├── Comet.java
 │                   │   └── Asteroid.java
+│                   ├── repository
+│                   │   └── AsteroidRepository.java
 │                   ├── service
 │                   │   └── SpaceObjectService.java
 │                   └── DemoApplication.java
@@ -150,7 +159,7 @@ src
 ```
 ## Testing
 
-The project includes JUnit tests for the SpaceObjectService.
+The project includes JUnit tests for the service layer and MockMvc tests for the controller layer.
 
 Current test coverage includes:
 
@@ -158,6 +167,9 @@ Current test coverage includes:
 - Minimum threat-level filtering
 - Invalid threat-level input
 - Closest near-Earth object logic
+- Successful asteroid endpoint responses
+- Invalid threat-level responses
+- Structured error response validation
 
 To run the test suite on Windows:
 
@@ -235,44 +247,45 @@ Swagger UI is available locally after starting the app:
 http://localhost:8080/swagger-ui/index.html
 ```
 
-## Current Sample Data
+## Current Data
 
-The project currently uses hardcoded sample data.
+The project currently uses a mix of database-backed and hardcoded sample data.
 
-This is intentional while the core backend architecture and API behavior are being developed.
+Asteroid data is stored in an H2 in-memory database and seeded at application startup using a `DataSeeder`.
 
-### Comets
-- Halley's Comet
- - Distance from Earth: 100.0
- - Tail Length: 500km
-- Red Rocket
- - Distance from Earth: 10000.0
- - Tail Length: 1000km
+Comet data is still hardcoded in the service layer for now.
 
 ### Asteroids
-- X-1002342
- - Distance from Earth: 100.0
- - Threat Level: 1
-- Devastator
- - Distance from Earth: 10000.0
- - Threat Level: 2
 
-Future versions will replace or supplement this sample data with real external space data.
+- X-1002342
+  - Distance from Earth: `100.0`
+  - Threat Level: `1`
+
+- Devastator
+  - Distance from Earth: `10000.0`
+  - Threat Level: `2`
+
+### Comets
+
+- Halley's Comet
+  - Distance from Earth: `100.0`
+  - Tail Length: `500km`
+
+- Red Rocket
+  - Distance from Earth: `10000.0`
+  - Tail Length: `1000km`
 
 ## Roadmap
 
 Planned future improvements include:
 
-- Add controller/API integration tests
-- Improve OpenAPI response documentation
-- Rename NearEarthObjects to the singular NearEarthObject
-- Expand DTO usage where appropriate
-- Add database persistence
+- Persist comet data
+- Add repository/integration tests
+- Migrate from H2 to PostgreSQL
 - Integrate an external NASA API
 - Add scheduled data ingestion
 - Add Docker and Docker Compose support
 - Add GitHub Actions CI
-- Expand the API to additional space-related objects
 
 ## Project Goals
 
