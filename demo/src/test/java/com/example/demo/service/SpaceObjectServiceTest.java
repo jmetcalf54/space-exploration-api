@@ -30,8 +30,7 @@ public class SpaceObjectServiceTest {
 
     @Test 
     void testThreatLevelFiltering() {
-        when(asteroidRepository.findAll()).thenReturn(List.of(
-            new Asteroid("X-1002342", 100.0, 1),
+        when(asteroidRepository.findByThreatLevel(2)).thenReturn(List.of(
             new Asteroid("Devastator", 10000.000, 2)
         ));
         List<Asteroid> result =
@@ -43,7 +42,7 @@ public class SpaceObjectServiceTest {
 
     @Test
     void testMinimumThreatLevelFiltering() {
-        when(asteroidRepository.findAll()).thenReturn(List.of(
+        when(asteroidRepository.findByThreatLevelGreaterThanEqual(1)).thenReturn(List.of(
             new Asteroid("X-1002342", 100.0, 1),
             new Asteroid("Devastator", 10000.000, 2)
         ));

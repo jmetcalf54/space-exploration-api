@@ -154,6 +154,8 @@ src
         └── com
             └── example
                 └── demo
+                    ├── controller
+                    │   └── SpaceObjectControllerTest.java 
                     └── service
                         └── SpaceObjectServiceTest.java
 ```

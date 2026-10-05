@@ -28,10 +28,6 @@ public class SpaceObjectService {
 
     public List<Asteroid> returnAsteroids() {
         return asteroidRepository.findAll();
-        // return List.of(
-        //     new Asteroid("X-1002342", 100.0,1),
-        //     new Asteroid("Devastator", 10000.000,2)
-        // );
     }
 
     public List<NearEarthObject> returnAllSpaceObjects() {
@@ -74,16 +70,12 @@ public class SpaceObjectService {
 
     public List<Asteroid> returnAsteroidsByThreatLevel(int level) {
         validateThreatLevel(level);
-        return returnAsteroids().stream()
-                .filter(asteroid -> asteroid.getThreatLevel() == level)
-                .collect(java.util.stream.Collectors.toList());
+        return asteroidRepository.findByThreatLevel(level);
     }
 
     public List<Asteroid> returnMinThreatLevelAsteroids(int level) {
         validateThreatLevel(level);
-        return returnAsteroids().stream()
-                .filter(asteroid -> asteroid.getThreatLevel() >= level)
-                .collect(java.util.stream.Collectors.toList());
+        return asteroidRepository.findByThreatLevelGreaterThanEqual(level);
     }
 
     private void validateThreatLevel(int level) {
