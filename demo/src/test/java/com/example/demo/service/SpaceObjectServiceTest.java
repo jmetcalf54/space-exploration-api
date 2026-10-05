@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import com.example.demo.model.Asteroid;
 import com.example.demo.model.NearEarthObject;
 import com.example.demo.repository.AsteroidRepository;
+import com.example.demo.repository.CometRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class SpaceObjectServiceTest {
@@ -23,9 +24,12 @@ public class SpaceObjectServiceTest {
     @Mock
     private AsteroidRepository asteroidRepository;
 
+    @Mock
+    private CometRepository cometRepository;
+
     @BeforeEach
     void setUp() {
-        spaceObjectService = new SpaceObjectService(asteroidRepository);
+        spaceObjectService = new SpaceObjectService(asteroidRepository, cometRepository);
     }
 
     @Test 

@@ -6,24 +6,26 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.repository.AsteroidRepository;
+import com.example.demo.repository.CometRepository;
+
 import com.example.demo.model.NearEarthObject;
-import com.example.demo.dto.NearEarthObjectResponse;
 import com.example.demo.model.Asteroid;
 import com.example.demo.model.Comet;
+
+import com.example.demo.dto.NearEarthObjectResponse;
 
 @Service
 public class SpaceObjectService {
     private final AsteroidRepository asteroidRepository;
+    private final CometRepository cometRepository;
 
-    public SpaceObjectService(AsteroidRepository asteroidRepository) {
+    public SpaceObjectService(AsteroidRepository asteroidRepository, CometRepository cometRepository) {
         this.asteroidRepository = asteroidRepository;
+        this.cometRepository = cometRepository;
     }
     
     public List<Comet> returnComets() {
-        return List.of(
-            new Comet("Halley's Comet", 100.0, "500km"),
-            new Comet("Red Rocket", 10000.000, "1000km")
-        );
+        return cometRepository.findAll();
     }
 
     public List<Asteroid> returnAsteroids() {
