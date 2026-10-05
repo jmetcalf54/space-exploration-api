@@ -156,6 +156,8 @@ src
                 └── demo
                     ├── controller
                     │   └── SpaceObjectControllerTest.java 
+                    ├── repository
+                    │   └── AsteriodRepositoryTest.java
                     └── service
                         └── SpaceObjectServiceTest.java
 ```
