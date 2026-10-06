@@ -2,36 +2,32 @@
 
 A backend-focused Java/Spring Boot project for exploring space-related data.
 
-The current version focuses on near-Earth objects such as asteroids and comets. It currently uses hardcoded sample data while the backend architecture, REST API design, validation, error handling, DTOs, and automated testing are being developed.
+The current version focuses on asteroids and comets stored through Spring Data JPA in an H2 in-memory database, with sample records seeded at startup. It includes a layered REST API, validation, structured error handling, DTO responses, and automated tests.
 
-The long-term goal is to integrate real external space data, likely through NASA APIs, and expand the project to support persistent storage, additional space objects, and more production-style backend features.
+The long-term goal is to integrate real external space data through NASA APIs and expand the project with additional space objects and more production-style backend features.
 
 ## Current Features
 
 - Spring Boot REST API
-- Near-Earth object inheritance model
-- Comet and asteroid models
+- Database-backed `Asteroid` and `Comet` JPA entities sharing the `NearEarthObject` mapped superclass
+- `AsteroidRepository` and `CometRepository` for database access
 - Service layer for business logic
 - DTO-based API responses
-- Asteroid filtering by exact threat level
-- Asteroid filtering by minimum threat level
+- Asteroid derived queries: `findByThreatLevel` for exact matches and `findByThreatLevelGreaterThanEqual` for minimum threat levels
 - Closest near-Earth object lookup
 - Threat-level input validation
-- Structured JSON error responses
-- Global exception handling
+- Global exception handling with structured JSON responses for invalid arguments
 - Swagger / OpenAPI documentation
 - Health endpoint
-- JUnit service-layer tests
-- Spring Data JPA repository layer
-- H2-backed asteroid persistence
-- Startup data seeding for asteroid records
+- JUnit/Mockito service tests, controller/MockMvc tests, and JPA repository tests for both entities
+- Startup data seeding for both asteroids and comets
 
 ## Tech Stack
 
 - Java 25
 - Spring Boot 4.x
 - Maven
-- JUnit 5
+- JUnit Jupiter, Mockito, and MockMvc
 - Spring Data JPA
 - H2 Database
 - Swagger / OpenAPI
@@ -43,7 +39,7 @@ The long-term goal is to integrate real external space data, likely through NASA
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
-| GET | `/health` | Confirms that the API is running |
+| GET | `/api/health` | Confirms that the API is running |
 
 ### Comets and Asteroids
 
@@ -100,15 +96,11 @@ Asteroid threat levels are currently restricted to values from 1 through 5.
 
 For example, a request such as:
 
-``` http
+```http
 GET /api/asteroids/threat/7
 ```
 
-returns:
-
-400 Bad Request
-
-with a structured JSON response:
+returns `400 Bad Request` with a structured JSON response:
 
 ```json
 {
@@ -118,64 +110,53 @@ with a structured JSON response:
 }
 ```
 
-Threat-level validation is handled in the service layer.
+Threat-level validation is handled in the service layer. `GlobalExceptionHandler` uses `@RestControllerAdvice` to map `IllegalArgumentException` to an `ApiErrorResponse`.
 
-API error responses are handled through a global exception handler using Spring's exception-handling functionality.
+## Project Structure
 
 ```text
-src
-├── main
-│   └── java
-│       └── com
-│           └── example
-│               └── demo
-│                   ├── controller
-│                   │   ├── SpaceObjectController.java
-│                   │   └── ...
-│                   ├── data
-│                   │   └── DataSeeder.java
-│                   ├── dto
-│                   │   ├── NearEarthObjectResponse.java
-│                   │   └── ApiErrorResponse.java
-│                   ├── exception
-│                   │   └── GlobalExceptionHandler.java
-│                   ├── model
-│                   │   ├── NearEarthObject.java
-│                   │   ├── Comet.java
-│                   │   └── Asteroid.java
-│                   ├── repository
-│                   │   └── AsteroidRepository.java
-│                   ├── service
-│                   │   └── SpaceObjectService.java
-│                   └── DemoApplication.java
-│
-└── test
-    └── java
-        └── com
-            └── example
-                └── demo
-                    ├── controller
-                    │   └── SpaceObjectControllerTest.java 
-                    ├── repository
-                    │   └── AsteriodRepositoryTest.java
-                    └── service
-                        └── SpaceObjectServiceTest.java
+demo/src/
+├── main/java/com/example/demo/
+│   ├── controller/
+│   │   ├── SpaceObjectController.java
+│   │   └── StatusController.java
+│   ├── data/DataSeeder.java
+│   ├── dto/
+│   │   ├── NearEarthObjectResponse.java
+│   │   └── ApiErrorResponse.java
+│   ├── exception/GlobalExceptionHandler.java
+│   ├── model/
+│   │   ├── NearEarthObject.java
+│   │   ├── Comet.java
+│   │   └── Asteroid.java
+│   ├── repository/
+│   │   ├── AsteroidRepository.java
+│   │   └── CometRepository.java
+│   ├── service/SpaceObjectService.java
+│   └── DemoApplication.java
+├── main/resources/application.properties
+└── test/java/com/example/demo/
+    ├── controller/SpaceObjectControllerTest.java
+    ├── repository/
+    │   ├── AsteroidRepositoryTest.java
+    │   └── CometRepositoryTest.java
+    ├── service/SpaceObjectServiceTest.java
+    └── DemoApplicationTests.java
 ```
+
 ## Testing
 
-The project includes JUnit tests for the service layer and MockMvc tests for the controller layer.
+The project includes JUnit/Mockito service tests, `@WebMvcTest` controller tests using MockMvc, and `@DataJpaTest` repository tests using H2.
 
 Current test coverage includes:
 
-- Exact asteroid threat-level filtering
-- Minimum threat-level filtering
-- Invalid threat-level input
-- Closest near-Earth object logic
-- Successful asteroid endpoint responses
-- Invalid threat-level responses
-- Structured error response validation
+- Service-layer exact/minimum threat-level filtering, invalid input, and closest-object logic
+- Successful asteroid and comet endpoint responses
+- Invalid threat-level responses and structured error validation
+- Asteroid persistence and exact/minimum threat-level repository queries
+- Comet persistence and retrieval of names and tail lengths
 
-To run the test suite on Windows:
+Run the test suite from the `demo` directory on Windows:
 
 ```powershell
 .\mvnw.cmd test
@@ -187,45 +168,36 @@ On macOS or Linux:
 ./mvnw test
 ```
 
-The project currently targets Java 25, so Maven must also be running with a Java 25 JDK.
-
-You can verify the active Java version with:
+Maven must run with a Java 25 JDK. Verify the active Java version with:
 
 ```bash
 java -version
 ```
 
-You can verify which Java version Maven is using with:
-
-Windows
-```powershell
-.\mvnw.cmd -version
-```
-
-macOS / Linux
-```bash
-./mvnw -version
-```
+Check Maven's Java version with `.\mvnw.cmd -version` on Windows or `./mvnw -version` on macOS/Linux.
 
 ## Prerequisites
+
 - Java 25
 - Git
 
 Maven does not need to be installed separately because the project includes the Maven Wrapper.
 
-Clone the Repository
+Clone the repository:
+
 ```bash
 git clone https://github.com/jmetcalf54/space-exploration-api.git
 ```
 
 Navigate into the Spring Boot project:
+
 ```bash
 cd space-exploration-api/demo
 ```
 
 ## Running the Project Locally
 
-On Windows:
+From the `demo` directory on Windows:
 
 ```powershell
 .\mvnw.cmd spring-boot:run
@@ -253,11 +225,7 @@ http://localhost:8080/swagger-ui/index.html
 
 ## Current Data
 
-The project currently uses a mix of database-backed and hardcoded sample data.
-
-Asteroid data is stored in an H2 in-memory database and seeded at application startup using a `DataSeeder`.
-
-Comet data is still hardcoded in the service layer for now.
+Both asteroids and comets are stored in an H2 in-memory database. `DataSeeder` seeds each entity's sample records at startup when its repository is empty. Data is recreated when the application restarts.
 
 ### Asteroids
 
@@ -283,10 +251,9 @@ Comet data is still hardcoded in the service layer for now.
 
 Planned future improvements include:
 
-- Persist comet data
-- Add repository/integration tests
-- Migrate from H2 to PostgreSQL
 - Integrate an external NASA API
+- Add an external API DTO/mapping layer
+- Consider migrating from H2 to PostgreSQL
 - Add scheduled data ingestion
 - Add Docker and Docker Compose support
 - Add GitHub Actions CI
