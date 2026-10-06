@@ -30,6 +30,13 @@ public class SpaceObjectControllerTest {
     }
 
     @Test
+    void testGetCometsReturns200() throws Exception {
+
+        mockMvc.perform(get("/api/comets"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
     void testInvalidThreatLevelReturns400() throws Exception {
         when(spaceObjectService.returnAsteroidsByThreatLevel(7))
             .thenThrow(new IllegalArgumentException(
