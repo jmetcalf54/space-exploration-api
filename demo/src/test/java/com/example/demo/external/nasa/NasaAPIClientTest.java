@@ -21,4 +21,11 @@ public class NasaAPIClientTest {
         assertFalse(nasaApiClient.getApiKey().isBlank());
     }
 
+    @Test
+    public void testFetchAsteroids() {
+        String response = nasaApiClient.fetchAsteroids();
+        assertNotNull(response);
+        assertFalse(response.isBlank());
+    }
+
 }
