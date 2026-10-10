@@ -2,6 +2,8 @@ package com.example.demo.external.nasa.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 public class NasaAsteroidResponse {
 
     @JsonProperty("name")
@@ -10,6 +12,12 @@ public class NasaAsteroidResponse {
     @JsonProperty("absolute_magnitude_h")
     private Double absoluteMagnitudeH;
 
+    @JsonProperty ("is_potentially_hazardous_asteroid")
+    private Boolean isPotentiallyHazardousAsteroid;
+
+    @JsonProperty ("close_approach_data")
+    private List<NasaCloseApproachResponse> closeApproachData;
+
     public String getName() {
         return name;
     }
@@ -17,5 +25,13 @@ public class NasaAsteroidResponse {
     public Double getAbsoluteMagnitudeH() {
         return absoluteMagnitudeH;
     }
-    
+
+    public Boolean getIsPotentiallyHazardousAsteroid() {
+        return isPotentiallyHazardousAsteroid;
+    }
+
+    public List<NasaCloseApproachResponse> getCloseApproachData() {
+        return closeApproachData;
+    }
+
 }
