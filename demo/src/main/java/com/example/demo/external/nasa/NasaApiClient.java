@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import com.example.demo.external.nasa.dto.NasaNeoBrowseResponse;
+
 @Component
 public class NasaApiClient {
 
@@ -18,7 +20,7 @@ public class NasaApiClient {
                 .build();
     }
 
-    public String fetchAsteroids() {
+    public NasaNeoBrowseResponse fetchAsteroids() {
         return restClient
                     .get()
                     .uri(uriBuilder -> uriBuilder
@@ -26,7 +28,7 @@ public class NasaApiClient {
                             .queryParam("api_key", apiKey)
                             .build())
                     .retrieve()
-                    .body(String.class);
+                    .body(NasaNeoBrowseResponse.class);
     }
 
     public String getApiKey() {

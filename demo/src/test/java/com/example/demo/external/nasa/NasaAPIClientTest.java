@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.example.demo.external.nasa.dto.NasaNeoBrowseResponse;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -23,9 +25,13 @@ public class NasaAPIClientTest {
 
     @Test
     public void testFetchAsteroids() {
-        String response = nasaApiClient.fetchAsteroids();
+        NasaNeoBrowseResponse response = nasaApiClient.fetchAsteroids();
+
         assertNotNull(response);
-        assertFalse(response.isBlank());
+        assertNotNull(response.getNearEarthObjects());
+        assertFalse(response.getNearEarthObjects().isEmpty());
+        assertNotNull(response.getNearEarthObjects().get(0).getName());
+        assertNotNull(response.getNearEarthObjects().get(0).getAbsoluteMagnitudeH());
     }
 
 }
