@@ -34,4 +34,20 @@ public class NasaAsteroidResponse {
         return closeApproachData;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setAbsoluteMagnitudeH(Double absoluteMagnitudeH) {
+        this.absoluteMagnitudeH = absoluteMagnitudeH;
+    }
+
+    public void setIsPotentiallyHazardousAsteroid(Boolean isPotentiallyHazardousAsteroid) {
+        this.isPotentiallyHazardousAsteroid = isPotentiallyHazardousAsteroid;
+    }
+
+    public void setCloseApproachData(List<NasaCloseApproachResponse> closeApproachData) {
+        this.closeApproachData = closeApproachData;
+    }
+    
 }

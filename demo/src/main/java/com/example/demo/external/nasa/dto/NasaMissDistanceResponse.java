@@ -11,4 +11,12 @@ public class NasaMissDistanceResponse {
         return kilometers;
     }
 
+    public Double getKilometersAsDouble() {
+        return Double.parseDouble(kilometers);
+    }
+
+    public void setKilometers(String kilometers) {
+        this.kilometers = kilometers;
+    }
+
 }

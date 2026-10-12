@@ -11,4 +11,8 @@ public class NasaCloseApproachResponse {
         return missDistance;
     }
 
+    public void setMissDistance(NasaMissDistanceResponse missDistance) {
+        this.missDistance = missDistance;
+    }
+
 }
