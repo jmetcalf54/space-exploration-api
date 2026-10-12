@@ -2,9 +2,9 @@
 
 A backend-focused Java/Spring Boot project for exploring space-related data.
 
-The current version focuses on asteroids and comets stored through Spring Data JPA in an H2 in-memory database, with sample records seeded at startup. It includes a layered REST API, validation, structured error handling, DTO responses, and automated tests.
+The current version focuses on asteroids and comets stored through Spring Data JPA in an H2 in-memory database, with sample records seeded at startup. It includes a layered REST API, validation, structured error handling, DTO responses, automated tests, and a NASA NeoWs client with external DTOs and asteroid mapping.
 
-The long-term goal is to integrate real external space data through NASA APIs and expand the project with additional space objects and more production-style backend features.
+The long-term goal is to expand NASA data ingestion, add additional space objects, and introduce more production-style backend features.
 
 ## Current Features
 
@@ -21,6 +21,11 @@ The long-term goal is to integrate real external space data through NASA APIs an
 - Health endpoint
 - JUnit/Mockito service tests, controller/MockMvc tests, and JPA repository tests for both entities
 - Startup data seeding for both asteroids and comets
+- NASA NeoWs browse integration through `NasaApiClient` using Spring's `RestClient`
+- NASA API key configuration through the `NASA_API_KEY` environment variable
+- External NASA DTOs for browse responses, asteroid responses, close approach data, and miss distance
+- `NasaAsteroidMapper` maps NASA asteroid names and the first close approach's miss distance in kilometers into the internal `Asteroid` model, with a default threat level of `1`
+- NASA API connectivity/deserialization tests and asteroid mapper tests
 
 ## Tech Stack
 
@@ -125,6 +130,14 @@ demo/src/
 │   │   ├── NearEarthObjectResponse.java
 │   │   └── ApiErrorResponse.java
 │   ├── exception/GlobalExceptionHandler.java
+│   ├── external/nasa/
+│   │   ├── NasaApiClient.java
+│   │   ├── NasaAsteroidMapper.java
+│   │   └── dto/
+│   │       ├── NasaNeoBrowseResponse.java
+│   │       ├── NasaAsteroidResponse.java
+│   │       ├── NasaCloseApproachResponse.java
+│   │       └── NasaMissDistanceResponse.java
 │   ├── model/
 │   │   ├── NearEarthObject.java
 │   │   ├── Comet.java
@@ -137,6 +150,9 @@ demo/src/
 ├── main/resources/application.properties
 └── test/java/com/example/demo/
     ├── controller/SpaceObjectControllerTest.java
+    ├── external/nasa/
+    │   ├── NasaAPIClientTest.java
+    │   └── NasaAsteroidMapperTest.java
     ├── repository/
     │   ├── AsteroidRepositoryTest.java
     │   └── CometRepositoryTest.java
@@ -146,7 +162,7 @@ demo/src/
 
 ## Testing
 
-The project includes JUnit/Mockito service tests, `@WebMvcTest` controller tests using MockMvc, and `@DataJpaTest` repository tests using H2.
+The project includes JUnit/Mockito service tests, `@WebMvcTest` controller tests using MockMvc, `@DataJpaTest` repository tests using H2, live NASA API tests using `@SpringBootTest`, and a unit test for the NASA asteroid mapper.
 
 Current test coverage includes:
 
@@ -155,6 +171,11 @@ Current test coverage includes:
 - Invalid threat-level responses and structured error validation
 - Asteroid persistence and exact/minimum threat-level repository queries
 - Comet persistence and retrieval of names and tail lengths
+- NASA API key configuration, live NeoWs connectivity, and browse response deserialization
+- Nested NASA close approach and miss distance deserialization
+- Mapping a NASA asteroid's name and kilometer miss distance into the internal `Asteroid` model
+
+Set `NASA_API_KEY` before running the full suite (see configuration below). The NASA client tests call the live NASA API and require network access and a valid API key.
 
 Run the test suite from the `demo` directory on Windows:
 
@@ -197,6 +218,28 @@ cd space-exploration-api/demo
 
 ## Running the Project Locally
 
+### NASA API Configuration
+
+`demo/src/main/resources/application.properties` reads the NASA API key from the environment:
+
+```properties
+nasa.api.key=${NASA_API_KEY}
+```
+
+Set it in the terminal used to run the application or tests. On Windows:
+
+```powershell
+$env:NASA_API_KEY = "your-nasa-api-key"
+```
+
+On macOS or Linux:
+
+```bash
+export NASA_API_KEY="your-nasa-api-key"
+```
+
+### Start the Application
+
 From the `demo` directory on Windows:
 
 ```powershell
@@ -227,6 +270,8 @@ http://localhost:8080/swagger-ui/index.html
 
 Both asteroids and comets are stored in an H2 in-memory database. `DataSeeder` seeds each entity's sample records at startup when its repository is empty. Data is recreated when the application restarts.
 
+The NASA client and mapper are implemented, but NASA data ingestion into persistence is still planned. The REST endpoints currently serve the database records described below.
+
 ### Asteroids
 
 - X-1002342
@@ -251,12 +296,11 @@ Both asteroids and comets are stored in an H2 in-memory database. `DataSeeder` s
 
 Planned future improvements include:
 
-- Integrate an external NASA API
-- Add an external API DTO/mapping layer
+- Expand NASA ingestion to process more complete browse data and persist mapped asteroids
 - Consider migrating from H2 to PostgreSQL
 - Add scheduled data ingestion
 - Add Docker and Docker Compose support
-- Add GitHub Actions CI
+- Add CI/CD workflows, including GitHub Actions CI
 
 ## Project Goals
 
