@@ -23,8 +23,8 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) {
         if (asteroidRepository.count() == 0) {
             asteroidRepository.saveAll(List.of(
-                new com.example.demo.model.Asteroid("X-1002342", 100.0, 1),
-                new com.example.demo.model.Asteroid("Devastator", 10000.000, 2)
+                new com.example.demo.model.Asteroid("X-1002342", 100.0, 1, false),
+                new com.example.demo.model.Asteroid("Devastator", 10000.000, 2, true)
             ));
         }
         if (cometRepository.count() == 0) {

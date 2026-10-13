@@ -35,7 +35,7 @@ public class SpaceObjectServiceTest {
     @Test 
     void testThreatLevelFiltering() {
         when(asteroidRepository.findByThreatLevel(2)).thenReturn(List.of(
-            new Asteroid("Devastator", 10000.000, 2)
+            new Asteroid("Devastator", 10000.000, 2, true)
         ));
         List<Asteroid> result =
             spaceObjectService.returnAsteroidsByThreatLevel(2);
@@ -47,8 +47,8 @@ public class SpaceObjectServiceTest {
     @Test
     void testMinimumThreatLevelFiltering() {
         when(asteroidRepository.findByThreatLevelGreaterThanEqual(1)).thenReturn(List.of(
-            new Asteroid("X-1002342", 100.0, 1),
-            new Asteroid("Devastator", 10000.000, 2)
+            new Asteroid("X-1002342", 100.0, 1, false),
+            new Asteroid("Devastator", 10000.000, 2, true)
         ));
         List<Asteroid> result = 
             spaceObjectService.returnMinThreatLevelAsteroids(1);
@@ -67,8 +67,8 @@ public class SpaceObjectServiceTest {
     @Test
     void testClosestSpaceObject() {
         when(asteroidRepository.findAll()).thenReturn(List.of(
-            new Asteroid("X-1002342", 100.0, 1),
-            new Asteroid("Devastator", 10000.000, 2)
+            new Asteroid("X-1002342", 100.0, 1, false),
+            new Asteroid("Devastator", 10000.000, 2, true)
         ));
         NearEarthObject result = 
             spaceObjectService.returnClosestSpaceObject();

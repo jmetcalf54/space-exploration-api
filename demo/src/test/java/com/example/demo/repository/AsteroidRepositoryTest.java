@@ -19,8 +19,8 @@ public class AsteroidRepositoryTest {
     @BeforeEach
     void setUp() {
         asteroidRepository.saveAll(List.of(
-            new Asteroid("X-1002342", 100.0, 1),
-            new Asteroid("Devastator", 10000.0, 2)
+            new Asteroid("X-1002342", 100.0, 1, false),
+            new Asteroid("Devastator", 10000.0, 2, true)
         ));
     }
 

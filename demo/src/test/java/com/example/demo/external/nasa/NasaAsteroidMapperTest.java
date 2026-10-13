@@ -10,6 +10,7 @@ import com.example.demo.model.Asteroid;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NasaAsteroidMapperTest {
 
@@ -25,6 +26,7 @@ public class NasaAsteroidMapperTest {
         NasaAsteroidResponse nasaAsteroid = new NasaAsteroidResponse();
         nasaAsteroid.setName("Test Asteroid");
         nasaAsteroid.setCloseApproachData(List.of(closeApproach));
+        nasaAsteroid.setIsPotentiallyHazardousAsteroid(true);
 
         NasaAsteroidMapper mapper = new NasaAsteroidMapper();
 
@@ -32,5 +34,6 @@ public class NasaAsteroidMapperTest {
 
         assertEquals("Test Asteroid", asteroid.getOfficialName());
         assertEquals(12345.67, asteroid.getDistanceFromEarth());
+        assertTrue(asteroid.getIsPotentiallyHazardousAsteroid());
     }
 }

@@ -6,14 +6,19 @@ import com.example.demo.model.Asteroid;
 
 public class NasaAsteroidMapper {
 
-
     public Asteroid toAsteroid(NasaAsteroidResponse response) {
-        
-        Double closeApproachDistanceDouble = response.getCloseApproachData().get(0).getMissDistance().getKilometersAsDouble();
+        Double closeApproachDistance = response
+                .getCloseApproachData()
+                .get(0)
+                .getMissDistance()
+                .getKilometersAsDouble();
 
-        Asteroid asteroid = new Asteroid(response.getName(),closeApproachDistanceDouble,1);
-
-        return asteroid;
+        return new Asteroid(
+                response.getName(),
+                closeApproachDistance,
+                3,
+                response.getIsPotentiallyHazardousAsteroid()
+        );
     }
-    
+
 }
