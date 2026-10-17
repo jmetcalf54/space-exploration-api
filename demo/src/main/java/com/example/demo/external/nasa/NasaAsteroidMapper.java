@@ -1,9 +1,12 @@
 package com.example.demo.external.nasa;
 
+import org.springframework.stereotype.Component;
+
 import com.example.demo.external.nasa.dto.NasaAsteroidResponse;
 
 import com.example.demo.model.Asteroid;
 
+@Component 
 public class NasaAsteroidMapper {
 
     public Asteroid toAsteroid(NasaAsteroidResponse response) {
