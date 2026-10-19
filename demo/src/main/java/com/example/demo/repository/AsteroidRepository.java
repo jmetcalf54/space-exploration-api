@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AsteroidRepository extends JpaRepository<Asteroid, Long>{
     
-    List<Asteroid> findByThreatLevel(int threatLevel);
+    List<Asteroid> findByRiskScore(int riskScore);
 
-    List<Asteroid> findByThreatLevelGreaterThanEqual(int threatLevel);
+    List<Asteroid> findByRiskScoreGreaterThanEqual(int riskScore);
 
 }

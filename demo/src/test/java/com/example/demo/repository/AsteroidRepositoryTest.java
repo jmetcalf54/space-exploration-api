@@ -26,14 +26,14 @@ public class AsteroidRepositoryTest {
 
     @Test
     void testFindByThreatLevel() {
-        List<Asteroid> asteroids = asteroidRepository.findByThreatLevel(2);
+        List<Asteroid> asteroids = asteroidRepository.findByRiskScore(2);
         assertEquals(1, asteroids.size());
         assertEquals("Devastator", asteroids.get(0).getOfficialName());
     }
 
     @Test
     void testFindByThreatLevelGreaterThanEqual() {
-        List<Asteroid> asteroids = asteroidRepository.findByThreatLevelGreaterThanEqual(1);
+        List<Asteroid> asteroids = asteroidRepository.findByRiskScoreGreaterThanEqual(1);
         assertEquals(2, asteroids.size());
     }
 

@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 @Table (name = "asteroids")
 public class Asteroid extends NearEarthObject {
     private boolean potentiallyHazardous;
-    private int threatLevel;
+    private int riskScore;
 
     @Id 
     @GeneratedValue
@@ -20,10 +20,10 @@ public class Asteroid extends NearEarthObject {
 
     public Asteroid(String officialName,
                 Double distanceFromEarth,
-                int threatLevel,
+                int riskScore,
                 boolean potentiallyHazardous) {
     super(officialName, distanceFromEarth);
-    this.threatLevel = threatLevel;
+    this.riskScore = riskScore;
     this.potentiallyHazardous = potentiallyHazardous;
 }
 
@@ -40,7 +40,7 @@ public class Asteroid extends NearEarthObject {
         return id;
     }
 
-    public int getThreatLevel() {
-        return threatLevel;
+    public int getRiskScore() {
+        return riskScore;
     }
 }
