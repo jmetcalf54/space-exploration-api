@@ -6,6 +6,7 @@ import com.example.demo.external.nasa.dto.NasaAsteroidResponse;
 import com.example.demo.external.nasa.dto.NasaCloseApproachResponse;
 import com.example.demo.external.nasa.dto.NasaMissDistanceResponse;
 import com.example.demo.model.Asteroid;
+import com.example.demo.service.AsteroidRiskCalculator;
 
 import java.util.List;
 
@@ -28,12 +29,14 @@ public class NasaAsteroidMapperTest {
         nasaAsteroid.setCloseApproachData(List.of(closeApproach));
         nasaAsteroid.setIsPotentiallyHazardousAsteroid(true);
 
-        NasaAsteroidMapper mapper = new NasaAsteroidMapper();
+        AsteroidRiskCalculator riskCalculator = new AsteroidRiskCalculator();
+        NasaAsteroidMapper mapper = new NasaAsteroidMapper(riskCalculator);
 
         Asteroid asteroid = mapper.toAsteroid(nasaAsteroid);
 
         assertEquals("Test Asteroid", asteroid.getOfficialName());
         assertEquals(12345.67, asteroid.getDistanceFromEarth());
         assertTrue(asteroid.getIsPotentiallyHazardousAsteroid());
+        assertEquals(5, asteroid.getRiskScore());
     }
 }
