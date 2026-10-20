@@ -13,9 +13,9 @@ The long-term goal is to expand NASA data ingestion, add additional space object
 - `AsteroidRepository` and `CometRepository` for database access
 - Service layer for business logic
 - DTO-based API responses
-- Asteroid derived queries: `findByThreatLevel` for exact matches and `findByThreatLevelGreaterThanEqual` for minimum threat levels
+- Asteroid derived queries: `findByRiskScore` for exact matches and `findByRiskScoreGreaterThanEqual` for minimum risk scores
 - Closest near-Earth object lookup
-- Threat-level input validation
+- Risk score input validation (1–5)
 - Global exception handling with structured JSON responses for invalid arguments
 - Swagger / OpenAPI documentation
 - Health endpoint
@@ -24,7 +24,8 @@ The long-term goal is to expand NASA data ingestion, add additional space object
 - NASA NeoWs browse integration through `NasaApiClient` using Spring's `RestClient`
 - NASA API key configuration through the `NASA_API_KEY` environment variable
 - External NASA DTOs for browse responses, asteroid responses, close approach data, and miss distance
-- `NasaAsteroidMapper` maps NASA asteroid names and the first close approach's miss distance in kilometers into the internal `Asteroid` model, with a default threat level of `1`
+- `NasaAsteroidMapper` maps NASA asteroid names, the first close approach's miss distance in kilometers, and NASA's potentially hazardous flag into the internal `Asteroid` model
+- `AsteroidRiskCalculator` calculates an application-defined `riskScore` from the hazardous flag and close-approach distance
 - NASA API connectivity/deserialization tests and asteroid mapper tests
 
 ## Tech Stack
@@ -52,8 +53,10 @@ The long-term goal is to expand NASA data ingestion, add additional space object
 | --- | --- | --- |
 | GET | `/api/comets` | Returns all comet data |
 | GET | `/api/asteroids` | Returns all asteroid data |
-| GET | `/api/asteroids?minThreatLevel=2` | Returns asteroids at or above the provided threat level |
-| GET | `/api/asteroids/threat/2` | Returns asteroids matching an exact threat level |
+| GET | `/api/asteroids?minThreatLevel=2` | Returns asteroids with `riskScore` at or above 2 |
+| GET | `/api/asteroids/threat/2` | Returns asteroids with `riskScore` equal to 2 |
+
+The existing query parameter `minThreatLevel` and `/threat/{level}` route retain their legacy names; both filter by `riskScore`.
 
 ### Near-Earth Objects
 
@@ -95,9 +98,25 @@ GET /api/near-earth-objects
 ]
 ```
 
+## Asteroid Risk Scoring
+
+`riskScore` is an application-defined score from 1–5. NASA provides the potentially hazardous flag (`is_potentially_hazardous_asteroid`); this application calculates the numeric risk score. The score is not a NASA-provided rating.
+
+A non-potentially-hazardous asteroid receives score **1**, regardless of distance. Potentially hazardous asteroids receive scores **2–5** based on close-approach distance, with closer approaches receiving higher scores:
+
+| Potentially hazardous | Close-approach distance (km) | `riskScore` |
+| --- | --- | --- |
+| No | Any distance | 1 |
+| Yes | Less than 100,000 | 5 |
+| Yes | 100,000 to less than 384,400 | 4 |
+| Yes | 384,400 to less than 1,000,000 | 3 |
+| Yes | 1,000,000 or more | 2 |
+
+`NasaAsteroidMapper` passes NASA's flag and the first close approach's miss distance in kilometers to `AsteroidRiskCalculator` to calculate `riskScore`.
+
 ## Validation and Error Handling
 
-Asteroid threat levels are currently restricted to values from 1 through 5.
+Asteroid risk score filters are restricted to values from 1 through 5.
 
 For example, a request such as:
 
@@ -115,7 +134,7 @@ returns `400 Bad Request` with a structured JSON response:
 }
 ```
 
-Threat-level validation is handled in the service layer. `GlobalExceptionHandler` uses `@RestControllerAdvice` to map `IllegalArgumentException` to an `ApiErrorResponse`.
+Risk score validation is handled in the service layer. The error message above retains the legacy wording "Threat level". `GlobalExceptionHandler` uses `@RestControllerAdvice` to map `IllegalArgumentException` to an `ApiErrorResponse`.
 
 ## Project Structure
 
@@ -145,7 +164,9 @@ demo/src/
 │   ├── repository/
 │   │   ├── AsteroidRepository.java
 │   │   └── CometRepository.java
-│   ├── service/SpaceObjectService.java
+│   ├── service/
+│   │   ├── SpaceObjectService.java
+│   │   └── AsteroidRiskCalculator.java
 │   └── DemoApplication.java
 ├── main/resources/application.properties
 └── test/java/com/example/demo/
@@ -156,7 +177,9 @@ demo/src/
     ├── repository/
     │   ├── AsteroidRepositoryTest.java
     │   └── CometRepositoryTest.java
-    ├── service/SpaceObjectServiceTest.java
+    ├── service/
+    │   ├── SpaceObjectServiceTest.java
+    │   └── AsteroidRiskCalculatorTest.java
     └── DemoApplicationTests.java
 ```
 
@@ -166,14 +189,15 @@ The project includes JUnit/Mockito service tests, `@WebMvcTest` controller tests
 
 Current test coverage includes:
 
-- Service-layer exact/minimum threat-level filtering, invalid input, and closest-object logic
+- Service-layer exact/minimum risk score filtering, invalid input, and closest-object logic
 - Successful asteroid and comet endpoint responses
-- Invalid threat-level responses and structured error validation
-- Asteroid persistence and exact/minimum threat-level repository queries
+- Invalid risk score filter responses and structured error validation
+- Asteroid persistence and exact/minimum risk score repository queries
 - Comet persistence and retrieval of names and tail lengths
 - NASA API key configuration, live NeoWs connectivity, and browse response deserialization
 - Nested NASA close approach and miss distance deserialization
 - Mapping a NASA asteroid's name and kilometer miss distance into the internal `Asteroid` model
+- Risk scoring for non-potentially-hazardous asteroids and each distance band for potentially hazardous asteroids
 
 Set `NASA_API_KEY` before running the full suite (see configuration below). The NASA client tests call the live NASA API and require network access and a valid API key.
 
@@ -274,13 +298,15 @@ The NASA client and mapper are implemented, but NASA data ingestion into persist
 
 ### Asteroids
 
+These startup sample records contain preset `riskScore` values; NASA-mapped asteroids use the calculation described above.
+
 - X-1002342
   - Distance from Earth: `100.0`
-  - Threat Level: `1`
+  - `riskScore`: `1`
 
 - Devastator
   - Distance from Earth: `10000.0`
-  - Threat Level: `2`
+  - `riskScore`: `2`
 
 ### Comets
 
