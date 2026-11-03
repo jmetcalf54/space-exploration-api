@@ -34,7 +34,8 @@ public class NasaAsteroidMapper {
                 response.getName(),
                 closeApproachDistance,
                 riskScore,
-                potentiallyHazardous
+                potentiallyHazardous,
+                response.getId()
         );
     }
 }

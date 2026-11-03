@@ -12,11 +12,14 @@ public class NasaAsteroidResponse {
     @JsonProperty("absolute_magnitude_h")
     private Double absoluteMagnitudeH;
 
-    @JsonProperty ("is_potentially_hazardous_asteroid")
+    @JsonProperty("is_potentially_hazardous_asteroid")
     private Boolean isPotentiallyHazardousAsteroid;
 
-    @JsonProperty ("close_approach_data")
+    @JsonProperty("close_approach_data")
     private List<NasaCloseApproachResponse> closeApproachData;
+
+    @JsonProperty("id")
+    private String id;
 
     public String getName() {
         return name;
@@ -34,6 +37,10 @@ public class NasaAsteroidResponse {
         return closeApproachData;
     }
 
+    public String getId() {
+        return id;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -49,5 +56,8 @@ public class NasaAsteroidResponse {
     public void setCloseApproachData(List<NasaCloseApproachResponse> closeApproachData) {
         this.closeApproachData = closeApproachData;
     }
-    
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }
