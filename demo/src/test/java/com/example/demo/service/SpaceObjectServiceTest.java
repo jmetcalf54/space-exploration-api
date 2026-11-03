@@ -38,29 +38,29 @@ public class SpaceObjectServiceTest {
             new Asteroid("Devastator", 10000.000, 2, true)
         ));
         List<Asteroid> result =
-            spaceObjectService.returnAsteroidsByThreatLevel(2);
+            spaceObjectService.returnAsteroidsByRiskScore(2);
 
         assertEquals(1, result.size());
         assertEquals("Devastator", result.get(0).getOfficialName());
     }
 
     @Test
-    void testMinimumThreatLevelFiltering() {
+    void testMinimumRiskScoreFiltering() {
         when(asteroidRepository.findByRiskScoreGreaterThanEqual(1)).thenReturn(List.of(
             new Asteroid("X-1002342", 100.0, 1, false),
             new Asteroid("Devastator", 10000.000, 2, true)
         ));
         List<Asteroid> result = 
-            spaceObjectService.returnMinThreatLevelAsteroids(1);
+            spaceObjectService.returnMinRiskScoreAsteroids(1);
         
         assertEquals(2, result.size());
         assertEquals("X-1002342", result.get(0).getOfficialName());
     }
 
     @Test
-    void testThreatLevelFilteringWithInvalidInput() {
+    void testRiskScoreFilteringWithInvalidInput() {
         assertThrows(IllegalArgumentException.class, () -> {
-            spaceObjectService.returnAsteroidsByThreatLevel(-1);
+            spaceObjectService.returnAsteroidsByRiskScore(-1);
         });
     }
 

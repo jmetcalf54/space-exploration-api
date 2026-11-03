@@ -70,12 +70,12 @@ public class SpaceObjectService {
         return response;
     }
 
-    public List<Asteroid> returnAsteroidsByThreatLevel(int level) {
+    public List<Asteroid> returnAsteroidsByRiskScore(int level) {
         validateThreatLevel(level);
         return asteroidRepository.findByRiskScore(level);
     }
 
-    public List<Asteroid> returnMinThreatLevelAsteroids(int level) {
+    public List<Asteroid> returnMinRiskScoreAsteroids(int level) {
         validateThreatLevel(level);
         return asteroidRepository.findByRiskScoreGreaterThanEqual(level);
     }
