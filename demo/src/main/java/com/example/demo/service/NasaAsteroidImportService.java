@@ -29,10 +29,15 @@ public class NasaAsteroidImportService {
  
     public List<Asteroid> importAsteroids() {
         NasaNeoBrowseResponse response = nasaApiClient.fetchAsteroids();
+
         List<Asteroid> asteroids = response.getNearEarthObjects()
-                .stream()
-                .map(nasaAsteroidMapper::toAsteroid)
-                .collect(Collectors.toList());
+            .stream()
+            .filter(asteroidResponse ->
+                    asteroidResponse.getCloseApproachData() != null &&
+                    !asteroidResponse.getCloseApproachData().isEmpty())
+            .map(nasaAsteroidMapper::toAsteroid)
+            .collect(Collectors.toList());
+
         return asteroidRepository.saveAll(asteroids);
     }
 
