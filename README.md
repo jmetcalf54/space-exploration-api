@@ -2,7 +2,7 @@
 
 A backend-focused Java/Spring Boot project for exploring space-related data.
 
-The current version focuses on asteroids and comets stored through Spring Data JPA in an H2 in-memory database, with sample records seeded at startup. It includes a layered REST API, validation, structured error handling, DTO responses, automated tests, and a NASA NeoWs client with external DTOs and asteroid mapping.
+The current version focuses on asteroids and comets stored through Spring Data JPA in PostgreSQL, with sample records seeded at startup when the corresponding repository is empty. It includes a layered REST API, validation, structured error handling, DTO responses, automated tests, and NASA NeoWs asteroid imports with mapping, application-defined risk scoring, and duplicate import protection. H2 remains available for repository tests.
 
 The long-term goal is to expand NASA data ingestion, add additional space objects, and introduce more production-style backend features.
 
@@ -24,9 +24,10 @@ The long-term goal is to expand NASA data ingestion, add additional space object
 - NASA NeoWs browse integration through `NasaApiClient` using Spring's `RestClient`
 - NASA API key configuration through the `NASA_API_KEY` environment variable
 - External NASA DTOs for browse responses, asteroid responses, close approach data, and miss distance
-- `NasaAsteroidMapper` maps NASA asteroid names, the first close approach's miss distance in kilometers, and NASA's potentially hazardous flag into the internal `Asteroid` model
+- `NasaAsteroidMapper` maps NASA asteroid IDs as `nasaId` values, names, the first close approach's miss distance in kilometers, and NASA's potentially hazardous flag into the internal `Asteroid` model
 - `AsteroidRiskCalculator` calculates an application-defined `riskScore` from the hazardous flag and close-approach distance
-- NASA API connectivity/deserialization tests and asteroid mapper tests
+- `NasaAsteroidImportService` filters NASA records, skips previously imported NASA IDs, and persists valid mapped asteroids to PostgreSQL
+- NASA API connectivity/deserialization tests, asteroid mapper tests, and import service tests
 
 ## Tech Stack
 
@@ -35,7 +36,8 @@ The long-term goal is to expand NASA data ingestion, add additional space object
 - Maven
 - JUnit Jupiter, Mockito, and MockMvc
 - Spring Data JPA
-- H2 Database
+- PostgreSQL for the main database
+- H2 for repository tests
 - Swagger / OpenAPI
 - VS Code
 
@@ -53,10 +55,13 @@ The long-term goal is to expand NASA data ingestion, add additional space object
 | --- | --- | --- |
 | GET | `/api/comets` | Returns all comet data |
 | GET | `/api/asteroids` | Returns all asteroid data |
-| GET | `/api/asteroids?minThreatLevel=2` | Returns asteroids with `riskScore` at or above 2 |
-| GET | `/api/asteroids/threat/2` | Returns asteroids with `riskScore` equal to 2 |
+| GET | `/api/asteroids?minRiskScore=2` | Returns asteroids with `riskScore` at or above 2 |
+| GET | `/api/asteroids/risk/2` | Returns asteroids with `riskScore` equal to 2 |
+| POST | `/api/asteroids/import` | Imports valid NASA NeoWs asteroid records into PostgreSQL and returns the saved asteroids |
 
-The existing query parameter `minThreatLevel` and `/threat/{level}` route retain their legacy names; both filter by `riskScore`.
+`POST /api/asteroids/import` fetches asteroid data from the NASA NeoWs browse endpoint. `NasaAsteroidImportService` filters out records without close-approach data or a nonblank NASA ID, skips NASA IDs already stored in the database, and maps the remaining records into the internal `Asteroid` model. Mapping calculates the application-defined `riskScore` using NASA's potentially hazardous flag and the first close approach's miss distance. The service persists the mapped asteroids to PostgreSQL and returns the saved records.
+
+NASA's external asteroid identifier is stored in `nasaId`. The import service uses `existsByNasaId` to prevent duplicate NASA asteroid imports, and the entity declares `nasaId` unique. The database-generated `id` is the application's internal database ID; it is separate from NASA's external `nasaId`.
 
 ### Near-Earth Objects
 
@@ -121,7 +126,7 @@ Asteroid risk score filters are restricted to values from 1 through 5.
 For example, a request such as:
 
 ```http
-GET /api/asteroids/threat/7
+GET /api/asteroids/risk/7
 ```
 
 returns `400 Bad Request` with a structured JSON response:
@@ -130,11 +135,11 @@ returns `400 Bad Request` with a structured JSON response:
 {
   "status": 400,
   "error": "invalid_argument",
-  "message": "Threat level must be between 1 and 5."
+  "message": "Risk score must be between 1 and 5."
 }
 ```
 
-Risk score validation is handled in the service layer. The error message above retains the legacy wording "Threat level". `GlobalExceptionHandler` uses `@RestControllerAdvice` to map `IllegalArgumentException` to an `ApiErrorResponse`.
+Risk score validation is handled in the service layer. `GlobalExceptionHandler` uses `@RestControllerAdvice` to map `IllegalArgumentException` to an `ApiErrorResponse`.
 
 ## Project Structure
 
@@ -166,6 +171,7 @@ demo/src/
 │   │   └── CometRepository.java
 │   ├── service/
 │   │   ├── SpaceObjectService.java
+│   │   ├── NasaAsteroidImportService.java
 │   │   └── AsteroidRiskCalculator.java
 │   └── DemoApplication.java
 ├── main/resources/application.properties
@@ -179,13 +185,14 @@ demo/src/
     │   └── CometRepositoryTest.java
     ├── service/
     │   ├── SpaceObjectServiceTest.java
+    │   ├── NasaAsteroidImportServiceTest.java
     │   └── AsteroidRiskCalculatorTest.java
     └── DemoApplicationTests.java
 ```
 
 ## Testing
 
-The project includes JUnit/Mockito service tests, `@WebMvcTest` controller tests using MockMvc, `@DataJpaTest` repository tests using H2, live NASA API tests using `@SpringBootTest`, and a unit test for the NASA asteroid mapper.
+The project includes JUnit/Mockito service tests (including the NASA import service), `@WebMvcTest` controller tests using MockMvc, `@DataJpaTest` repository tests using H2, live NASA API tests using `@SpringBootTest`, and a unit test for the NASA asteroid mapper.
 
 Current test coverage includes:
 
@@ -197,9 +204,10 @@ Current test coverage includes:
 - NASA API key configuration, live NeoWs connectivity, and browse response deserialization
 - Nested NASA close approach and miss distance deserialization
 - Mapping a NASA asteroid's name and kilometer miss distance into the internal `Asteroid` model
+- Import service tests verifying persistence, NASA ID mapping in the returned records, and duplicate import protection using `nasaId` checks
 - Risk scoring for non-potentially-hazardous asteroids and each distance band for potentially hazardous asteroids
 
-Set `NASA_API_KEY` before running the full suite (see configuration below). The NASA client tests call the live NASA API and require network access and a valid API key.
+Set `NASA_API_KEY` and `POSTGRES_PASSWORD` before running the full suite (see configuration below), and make sure the configured PostgreSQL database is available for `@SpringBootTest` tests. Repository tests use H2. The NASA client tests call the live NASA API and require network access and a valid API key.
 
 Run the test suite from the `demo` directory on Windows:
 
@@ -225,6 +233,7 @@ Check Maven's Java version with `.\mvnw.cmd -version` on Windows or `./mvnw -ver
 
 - Java 25
 - Git
+- PostgreSQL with the database and user configured in `application.properties`
 
 Maven does not need to be installed separately because the project includes the Maven Wrapper.
 
@@ -241,6 +250,29 @@ cd space-exploration-api/demo
 ```
 
 ## Running the Project Locally
+
+### PostgreSQL Configuration
+
+PostgreSQL connection settings are read from `demo/src/main/resources/application.properties`:
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/space_exploration
+spring.datasource.username=postgres
+spring.datasource.password=${POSTGRES_PASSWORD}
+spring.jpa.hibernate.ddl-auto=update
+```
+
+Ensure PostgreSQL is running and the `space_exploration` database exists and is accessible to the configured user. Set the password in the terminal used to run the application or full test suite. On Windows:
+
+```powershell
+$env:POSTGRES_PASSWORD = "your-postgres-password"
+```
+
+On macOS or Linux:
+
+```bash
+export POSTGRES_PASSWORD="your-postgres-password"
+```
 
 ### NASA API Configuration
 
@@ -292,9 +324,9 @@ http://localhost:8080/swagger-ui/index.html
 
 ## Current Data
 
-Both asteroids and comets are stored in an H2 in-memory database. `DataSeeder` seeds each entity's sample records at startup when its repository is empty. Data is recreated when the application restarts.
+PostgreSQL persists seeded asteroid and comet data as well as imported NASA asteroid data across application restarts. `DataSeeder` seeds each entity's sample records at startup only when its repository is empty.
 
-The NASA client and mapper are implemented, but NASA data ingestion into persistence is still planned. The REST endpoints currently serve the database records described below.
+The REST endpoints serve the stored database records. Calling `POST /api/asteroids/import` adds valid NASA asteroid records that have not already been imported, identified by `nasaId`. Local seeded asteroids may have `nasaId = null` because they are not NASA-imported records; they still receive an internal database-generated `id`.
 
 ### Asteroids
 
@@ -306,7 +338,7 @@ These startup sample records contain preset `riskScore` values; NASA-mapped aste
 
 - Devastator
   - Distance from Earth: `10000.0`
-  - `riskScore`: `2`
+  - `riskScore`: `5`
 
 ### Comets
 
@@ -322,8 +354,7 @@ These startup sample records contain preset `riskScore` values; NASA-mapped aste
 
 Planned future improvements include:
 
-- Expand NASA ingestion to process more complete browse data and persist mapped asteroids
-- Consider migrating from H2 to PostgreSQL
+- Expand NASA ingestion to process more complete browse data
 - Add scheduled data ingestion
 - Add Docker and Docker Compose support
 - Add CI/CD workflows, including GitHub Actions CI
