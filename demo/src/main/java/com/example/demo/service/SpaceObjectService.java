@@ -71,18 +71,18 @@ public class SpaceObjectService {
     }
 
     public List<Asteroid> returnAsteroidsByRiskScore(int level) {
-        validateThreatLevel(level);
+        validateRiskScore(level);
         return asteroidRepository.findByRiskScore(level);
     }
 
     public List<Asteroid> returnMinRiskScoreAsteroids(int level) {
-        validateThreatLevel(level);
+        validateRiskScore(level);
         return asteroidRepository.findByRiskScoreGreaterThanEqual(level);
     }
 
-    private void validateThreatLevel(int level) {
+    private void validateRiskScore(int level) {
         if (level < 1 || level > 5) {
-            throw new IllegalArgumentException("Threat level must be between 1 and 5.");
+            throw new IllegalArgumentException("Risk score must be between 1 and 5.");
         }
     }
 }

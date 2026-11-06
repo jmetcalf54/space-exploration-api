@@ -17,6 +17,7 @@ import com.example.demo.repository.AsteroidRepository;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,7 +55,9 @@ public class NasaAsteroidImportServiceTest {
 
         nasaAsteroid.setId("123456");
         nasaAsteroid.setName("Test Asteroid");
-        nasaAsteroid.setCloseApproachData(List.of(closeApproach));
+        nasaAsteroid.setCloseApproachData(
+                List.of(closeApproach)
+        );
 
         NasaNeoBrowseResponse nasaResponse =
                 new NasaNeoBrowseResponse();
@@ -74,6 +77,9 @@ public class NasaAsteroidImportServiceTest {
 
         when(nasaApiClient.fetchAsteroids())
                 .thenReturn(nasaResponse);
+
+        when(asteroidRepository.existsByNasaId("123456"))
+                .thenReturn(false);
 
         when(nasaAsteroidMapper.toAsteroid(nasaAsteroid))
                 .thenReturn(mappedAsteroid);
@@ -95,10 +101,59 @@ public class NasaAsteroidImportServiceTest {
                 result.get(0).getNasaId()
         );
 
+        verify(asteroidRepository)
+                .existsByNasaId("123456");
+
         verify(nasaAsteroidMapper)
                 .toAsteroid(nasaAsteroid);
 
         verify(asteroidRepository)
                 .saveAll(List.of(mappedAsteroid));
+    }
+
+    @Test
+    void testDoesNotImportDuplicateAsteroid() {
+
+        NasaCloseApproachResponse closeApproach =
+                new NasaCloseApproachResponse();
+
+        NasaAsteroidResponse nasaAsteroid =
+                new NasaAsteroidResponse();
+
+        nasaAsteroid.setId("123456");
+        nasaAsteroid.setName("Test Asteroid");
+        nasaAsteroid.setCloseApproachData(
+                List.of(closeApproach)
+        );
+
+        NasaNeoBrowseResponse nasaResponse =
+                new NasaNeoBrowseResponse();
+
+        nasaResponse.setNearEarthObjects(
+                List.of(nasaAsteroid)
+        );
+
+        when(nasaApiClient.fetchAsteroids())
+                .thenReturn(nasaResponse);
+
+        when(asteroidRepository.existsByNasaId("123456"))
+                .thenReturn(true);
+
+        when(asteroidRepository.saveAll(List.of()))
+                .thenReturn(List.of());
+
+        List<Asteroid> result =
+                importService.importAsteroids();
+
+        assertEquals(0, result.size());
+
+        verify(asteroidRepository)
+                .existsByNasaId("123456");
+
+        verify(nasaAsteroidMapper, never())
+                .toAsteroid(nasaAsteroid);
+
+        verify(asteroidRepository)
+                .saveAll(List.of());
     }
 }

@@ -7,11 +7,11 @@ import java.util.stream.Collectors;
 
 import com.example.demo.external.nasa.NasaApiClient;
 import com.example.demo.external.nasa.NasaAsteroidMapper;
-import com.example.demo.repository.AsteroidRepository;
 import com.example.demo.external.nasa.dto.NasaNeoBrowseResponse;
 import com.example.demo.model.Asteroid;
+import com.example.demo.repository.AsteroidRepository;
 
-@Service 
+@Service
 public class NasaAsteroidImportService {
 
     private final NasaApiClient nasaApiClient;
@@ -22,23 +22,37 @@ public class NasaAsteroidImportService {
             NasaApiClient nasaApiClient,
             NasaAsteroidMapper nasaAsteroidMapper,
             AsteroidRepository asteroidRepository) {
+
         this.nasaApiClient = nasaApiClient;
         this.nasaAsteroidMapper = nasaAsteroidMapper;
         this.asteroidRepository = asteroidRepository;
     }
- 
-    public List<Asteroid> importAsteroids() {
-        NasaNeoBrowseResponse response = nasaApiClient.fetchAsteroids();
 
-        List<Asteroid> asteroids = response.getNearEarthObjects()
-            .stream()
-            .filter(asteroidResponse ->
-                    asteroidResponse.getCloseApproachData() != null &&
-                    !asteroidResponse.getCloseApproachData().isEmpty())
-            .map(nasaAsteroidMapper::toAsteroid)
-            .collect(Collectors.toList());
+    public List<Asteroid> importAsteroids() {
+
+        NasaNeoBrowseResponse response =
+                nasaApiClient.fetchAsteroids();
+
+        List<Asteroid> asteroids = response
+                .getNearEarthObjects()
+                .stream()
+
+                .filter(asteroidResponse ->
+                        asteroidResponse.getCloseApproachData() != null &&
+                        !asteroidResponse.getCloseApproachData().isEmpty())
+
+                .filter(asteroidResponse ->
+                        asteroidResponse.getId() != null &&
+                        !asteroidResponse.getId().isBlank())
+
+                .filter(asteroidResponse ->
+                        !asteroidRepository.existsByNasaId(
+                                asteroidResponse.getId()
+                        ))
+
+                .map(nasaAsteroidMapper::toAsteroid)
+                .collect(Collectors.toList());
 
         return asteroidRepository.saveAll(asteroids);
     }
-
 }

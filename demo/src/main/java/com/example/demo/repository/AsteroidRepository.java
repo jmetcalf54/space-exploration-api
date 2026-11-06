@@ -11,4 +11,6 @@ public interface AsteroidRepository extends JpaRepository<Asteroid, Long>{
 
     List<Asteroid> findByRiskScoreGreaterThanEqual(int riskScore);
 
+    boolean existsByNasaId(String nasaId);
+
 }
