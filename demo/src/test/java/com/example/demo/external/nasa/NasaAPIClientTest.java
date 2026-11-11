@@ -10,7 +10,9 @@ import com.example.demo.external.nasa.dto.NasaNeoBrowseResponse;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import org.junit.jupiter.api.Tag;
 
+@Tag("integration")
 @SpringBootTest
 public class NasaAPIClientTest {
     
