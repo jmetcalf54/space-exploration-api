@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: space-exploration-postgres
+    environment:
+      POSTGRES_DB: space_exploration
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+
+volumes:
+  postgres-data:
