@@ -11,5 +11,17 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql
 
+  app:
+    image: space-exploration-api
+    container_name: space-exploration-api
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      NASA_API_KEY: ${NASA_API_KEY}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/space_exploration
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
 volumes:
   postgres-data:
