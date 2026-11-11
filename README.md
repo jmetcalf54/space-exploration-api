@@ -2,7 +2,7 @@
 
 A backend-focused Java/Spring Boot project for exploring space-related data.
 
-The current version focuses on asteroids and comets stored through Spring Data JPA in PostgreSQL, with sample records seeded at startup when the corresponding repository is empty. It includes a layered REST API, validation, structured error handling, DTO responses, automated tests, and NASA NeoWs asteroid imports with mapping, application-defined risk scoring, and duplicate import protection. H2 remains available for repository tests.
+The current version focuses on asteroids and comets stored through Spring Data JPA in PostgreSQL, with sample records seeded at startup when the corresponding repository is empty. It includes a layered REST API, validation, structured error handling, DTO responses, automated tests, and NASA NeoWs asteroid imports with mapping, application-defined risk scoring, and duplicate import protection. Flyway tracks the database schema, Docker Compose runs the containerized application and PostgreSQL, and normal tests use H2 in isolation from external services.
 
 The long-term goal is to expand NASA data ingestion, add additional space objects, and introduce more production-style backend features.
 
@@ -21,13 +21,19 @@ The long-term goal is to expand NASA data ingestion, add additional space object
 - Health endpoint
 - JUnit/Mockito service tests, controller/MockMvc tests, and JPA repository tests for both entities
 - Startup data seeding for both asteroids and comets
+- PostgreSQL persistence with a named Docker volume
+- Flyway initial schema migration and version tracking with Hibernate schema validation
+- Spring Boot application containerization through `demo/Dockerfile`
+- Docker Compose for the application and PostgreSQL
+- H2 test isolation and separation of live NASA integration tests from the normal Maven suite
+- GitHub Actions CI for the normal test suite on pushes and pull requests to `main`
 - NASA NeoWs browse integration through `NasaApiClient` using Spring's `RestClient`
 - NASA API key configuration through the `NASA_API_KEY` environment variable
 - External NASA DTOs for browse responses, asteroid responses, close approach data, and miss distance
 - `NasaAsteroidMapper` maps NASA asteroid IDs as `nasaId` values, names, the first close approach's miss distance in kilometers, and NASA's potentially hazardous flag into the internal `Asteroid` model
 - `AsteroidRiskCalculator` calculates an application-defined `riskScore` from the hazardous flag and close-approach distance
 - `NasaAsteroidImportService` filters NASA records, skips previously imported NASA IDs, and persists valid mapped asteroids to PostgreSQL
-- NASA API connectivity/deserialization tests, asteroid mapper tests, and import service tests
+- Separate live NASA API connectivity/deserialization tests, asteroid mapper tests, and import service tests
 
 ## Tech Stack
 
@@ -37,7 +43,10 @@ The long-term goal is to expand NASA data ingestion, add additional space object
 - JUnit Jupiter, Mockito, and MockMvc
 - Spring Data JPA
 - PostgreSQL for the main database
-- H2 for repository tests
+- Flyway for database schema migrations and version tracking
+- H2 for normal tests
+- Docker and Docker Compose
+- GitHub Actions CI configuration
 - Swagger / OpenAPI
 - VS Code
 
@@ -174,7 +183,10 @@ demo/src/
 │   │   ├── NasaAsteroidImportService.java
 │   │   └── AsteroidRiskCalculator.java
 │   └── DemoApplication.java
-├── main/resources/application.properties
+├── main/resources/
+│   ├── application.properties
+│   └── db/migration/V1__create_initial_schema.sql
+├── test/resources/application.properties
 └── test/java/com/example/demo/
     ├── controller/SpaceObjectControllerTest.java
     ├── external/nasa/
@@ -192,7 +204,21 @@ demo/src/
 
 ## Testing
 
-The project includes JUnit/Mockito service tests (including the NASA import service), `@WebMvcTest` controller tests using MockMvc, `@DataJpaTest` repository tests using H2, live NASA API tests using `@SpringBootTest`, and a unit test for the NASA asteroid mapper.
+The normal `mvn test` suite runs **15 tests** without a live NASA API call, a real NASA API key, or a PostgreSQL instance. It includes JUnit/Mockito service tests (including the NASA import service), `@WebMvcTest` controller tests using MockMvc, `@DataJpaTest` repository tests, an application context test, and a unit test for the NASA asteroid mapper.
+
+Test-specific configuration in `demo/src/test/resources/application.properties` isolates normal tests from the main application database:
+
+```properties
+spring.datasource.url=jdbc:h2:mem:space_exploration_test
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.flyway.enabled=false
+nasa.api.key=test-key
+```
+
+H2 provides an in-memory database, Hibernate creates and drops the test schema, and Flyway is disabled for normal test execution. The fake NASA key only allows the Spring test context to load without a real secret.
 
 Current test coverage includes:
 
@@ -201,13 +227,11 @@ Current test coverage includes:
 - Invalid risk score filter responses and structured error validation
 - Asteroid persistence and exact/minimum risk score repository queries
 - Comet persistence and retrieval of names and tail lengths
-- NASA API key configuration, live NeoWs connectivity, and browse response deserialization
-- Nested NASA close approach and miss distance deserialization
 - Mapping a NASA asteroid's name and kilometer miss distance into the internal `Asteroid` model
 - Import service tests verifying persistence, NASA ID mapping in the returned records, and duplicate import protection using `nasaId` checks
 - Risk scoring for non-potentially-hazardous asteroids and each distance band for potentially hazardous asteroids
 
-Set `NASA_API_KEY` and `POSTGRES_PASSWORD` before running the full suite (see configuration below), and make sure the configured PostgreSQL database is available for `@SpringBootTest` tests. Repository tests use H2. The NASA client tests call the live NASA API and require network access and a valid API key.
+`NasaAPIClientTest` uses `@SpringBootTest` and is tagged `@Tag("integration")`. Maven Surefire excludes the `integration` tag from normal test execution. These separate live tests cover NASA API key configuration, NeoWs connectivity, browse responses, and nested close-approach/miss-distance deserialization. Running them explicitly requires network access and a real key supplied as a Spring property override, because the test configuration otherwise supplies `test-key`.
 
 Run the test suite from the `demo` directory on Windows:
 
@@ -229,11 +253,23 @@ java -version
 
 Check Maven's Java version with `.\mvnw.cmd -version` on Windows or `./mvnw -version` on macOS/Linux.
 
+## Continuous Integration
+
+The GitHub Actions CI configuration targets pushes to `main` and pull requests targeting `main`. It uses Ubuntu, Java 25 from Temurin, and Maven dependency caching. Commands run from the `demo` directory, with the test step running:
+
+```bash
+./mvnw clean test
+```
+
+The normal CI test run uses the H2 test configuration and excludes live NASA integration tests, so it requires neither a real NASA API key nor a PostgreSQL service.
+
+The workflow is located at `.github/workflows/ci.yml`.
+
 ## Prerequisites
 
-- Java 25
 - Git
-- PostgreSQL with the database and user configured in `application.properties`
+- Docker with Docker Compose for running the full stack
+- Java 25 for running the application or Maven tests outside Docker
 
 Maven does not need to be installed separately because the project includes the Maven Wrapper.
 
@@ -251,6 +287,58 @@ cd space-exploration-api/demo
 
 ## Running the Project Locally
 
+### Full Stack with Docker Compose
+
+Run these commands from the `demo` directory. `compose.yml` defines the Spring Boot `app` service and the `postgres` service. Set both required environment variables in the same terminal before starting the stack.
+
+On Windows:
+
+```powershell
+$env:POSTGRES_PASSWORD = "your-postgres-password"
+$env:NASA_API_KEY = "your-nasa-api-key"
+```
+
+On macOS or Linux:
+
+```bash
+export POSTGRES_PASSWORD="your-postgres-password"
+export NASA_API_KEY="your-nasa-api-key"
+```
+
+Build the application image using `demo/Dockerfile` (the command below runs from `demo`). Compose references this image rather than building it automatically:
+
+```bash
+docker build -f Dockerfile -t space-exploration-api .
+docker compose up -d
+docker compose ps
+```
+
+The application is exposed at `http://localhost:8080`, and PostgreSQL is exposed on port `5432`. Inside Compose, the application connects to `jdbc:postgresql://postgres:5432/space_exploration` using the service hostname `postgres`. Compose supplies this URL through `SPRING_DATASOURCE_URL`; `localhost` inside the application container would refer to that container itself.
+
+PostgreSQL stores its data in the named volume `postgres-data`, mounted at `/var/lib/postgresql`. Compose normally prefixes the volume name with the Compose project name. The volume preserves database data across container restarts and stack shutdowns.
+
+View application logs:
+
+```bash
+docker logs space-exploration-api
+```
+
+Stop the stack while retaining the database volume:
+
+```bash
+docker compose down
+```
+
+A fresh Docker Compose environment has been successfully verified end-to-end:
+
+- PostgreSQL starts with a fresh named volume.
+- Flyway automatically applies version 1 from `V1__create_initial_schema.sql`.
+- The `asteroids`, `comets`, and `flyway_schema_history` tables are created, along with the required ID sequences.
+- Hibernate validates the schema.
+- Spring Boot starts successfully.
+
+No pre-existing application schema or manual Flyway baseline is required for a fresh setup. Sample data seeding runs after schema validation succeeds.
+
 ### PostgreSQL Configuration
 
 PostgreSQL connection settings are read from `demo/src/main/resources/application.properties`:
@@ -259,10 +347,12 @@ PostgreSQL connection settings are read from `demo/src/main/resources/applicatio
 spring.datasource.url=jdbc:postgresql://localhost:5432/space_exploration
 spring.datasource.username=postgres
 spring.datasource.password=${POSTGRES_PASSWORD}
-spring.jpa.hibernate.ddl-auto=update
+spring.flyway.baseline-on-migrate=true
+spring.flyway.baseline-version=1
+spring.jpa.hibernate.ddl-auto=validate
 ```
 
-Ensure PostgreSQL is running and the `space_exploration` database exists and is accessible to the configured user. Set the password in the terminal used to run the application or full test suite. On Windows:
+When running the application directly on the host, ensure PostgreSQL is running on `localhost:5432` and the `space_exploration` database exists and is accessible to the configured user. Flyway creates the initial application schema automatically on an empty database. PostgreSQL can also be started separately with `docker compose up -d postgres` after setting both required environment variables shown above. Set the password in the terminal used to run the application. On Windows:
 
 ```powershell
 $env:POSTGRES_PASSWORD = "your-postgres-password"
@@ -282,7 +372,7 @@ export POSTGRES_PASSWORD="your-postgres-password"
 nasa.api.key=${NASA_API_KEY}
 ```
 
-Set it in the terminal used to run the application or tests. On Windows:
+Set it in the terminal used to run the application. Normal tests use the fake key from their test configuration. On Windows:
 
 ```powershell
 $env:NASA_API_KEY = "your-nasa-api-key"
@@ -294,7 +384,19 @@ On macOS or Linux:
 export NASA_API_KEY="your-nasa-api-key"
 ```
 
-### Start the Application
+### Flyway Schema Management
+
+Flyway manages database schema migrations and version tracking. The project includes `src/main/resources/db/migration/V1__create_initial_schema.sql` within `demo`. On a completely fresh PostgreSQL database, Flyway automatically applies this version 1 migration and records it in `flyway_schema_history`.
+
+The migration creates the initial `asteroids` and `comets` tables, including the unique constraint on `asteroids.nasa_id`, and the required `asteroids_seq` and `comets_seq` ID sequences. No pre-existing application schema or manual baseline is needed.
+
+The previously existing development database was originally baselined at version **1**. The main application retains `baseline-on-migrate=true` and `baseline-version=1` for that existing-schema history; baselining is not a setup step for new databases.
+
+The main application uses `spring.jpa.hibernate.ddl-auto=validate`, so Hibernate checks that the schema matches the entities instead of automatically modifying it.
+
+Introduce future schema changes through additional versioned Flyway SQL migration files under `src/main/resources/db/migration` within `demo`.
+
+### Start the Application Outside Docker
 
 From the `demo` directory on Windows:
 
@@ -356,8 +458,7 @@ Planned future improvements include:
 
 - Expand NASA ingestion to process more complete browse data
 - Add scheduled data ingestion
-- Add Docker and Docker Compose support
-- Add CI/CD workflows, including GitHub Actions CI
+- Deploy the application
 
 ## Project Goals
 
