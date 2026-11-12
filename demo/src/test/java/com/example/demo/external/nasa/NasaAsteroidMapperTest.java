@@ -28,6 +28,7 @@ public class NasaAsteroidMapperTest {
         nasaAsteroid.setName("Test Asteroid");
         nasaAsteroid.setCloseApproachData(List.of(closeApproach));
         nasaAsteroid.setIsPotentiallyHazardousAsteroid(true);
+        nasaAsteroid.setId("123456");
 
         AsteroidRiskCalculator riskCalculator = new AsteroidRiskCalculator();
         NasaAsteroidMapper mapper = new NasaAsteroidMapper(riskCalculator);
@@ -38,5 +39,6 @@ public class NasaAsteroidMapperTest {
         assertEquals(12345.67, asteroid.getDistanceFromEarth());
         assertTrue(asteroid.getIsPotentiallyHazardousAsteroid());
         assertEquals(5, asteroid.getRiskScore());
+        assertEquals("123456", asteroid.getNasaId());
     }
 }

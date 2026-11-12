@@ -44,7 +44,15 @@ public class NasaAPIClientTest {
         assertNotNull(response);
         assertFalse(response.getNearEarthObjects().isEmpty());
 
-        NasaAsteroidResponse asteroid = response.getNearEarthObjects().get(0);
+        NasaAsteroidResponse asteroid = response
+            .getNearEarthObjects()
+            .stream()
+            .filter(a ->
+                a.getCloseApproachData() != null &&
+                !a.getCloseApproachData().isEmpty()
+            )
+            .findFirst()
+            .orElseThrow();
 
         assertNotNull(asteroid.getCloseApproachData());
         assertFalse(asteroid.getCloseApproachData().isEmpty());

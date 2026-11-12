@@ -55,12 +55,19 @@ public class SpaceObjectService {
 
     public NearEarthObject returnClosestSpaceObject() {
         List<NearEarthObject> allSpaceObjects = returnAllSpaceObjects();
+
+        if (allSpaceObjects.isEmpty()) {
+            throw new IllegalStateException("No near-Earth objects are available.");
+        }
+
         NearEarthObject closest = allSpaceObjects.get(0);
+
         for (NearEarthObject obj : allSpaceObjects) {
             if (obj.getDistanceFromEarth() < closest.getDistanceFromEarth()) {
                 closest = obj;
             }
         }
+
         return closest;
     }
 

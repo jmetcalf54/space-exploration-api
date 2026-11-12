@@ -31,13 +31,5 @@ public abstract class NearEarthObject {
         this.distanceFromEarth = distanceFromEarth;
     }
 
-    public void printOfficialName() {
-        System.out.println(getOfficialName());
-    }
-
-    public void printDistanceFromEarth() {
-        System.out.println(getDistanceFromEarth());
-    }
-
     public abstract String getObjectType();
 }

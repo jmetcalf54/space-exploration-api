@@ -17,4 +17,16 @@ public class GlobalExceptionHandler {
                 "invalid_argument", 
                 e.getMessage()));
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleIllegalStateException(
+            IllegalStateException e) {
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(new ApiErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "not_found",
+                e.getMessage()
+            ));
+    }
 }

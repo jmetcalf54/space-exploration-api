@@ -33,7 +33,7 @@ public class SpaceObjectServiceTest {
     }
 
     @Test 
-    void testThreatLevelFiltering() {
+    void testRiskScoreFiltering() {
         when(asteroidRepository.findByRiskScore(2)).thenReturn(List.of(
             new Asteroid("Devastator", 10000.000, 2, true)
         ));
@@ -73,5 +73,16 @@ public class SpaceObjectServiceTest {
         NearEarthObject result = 
             spaceObjectService.returnClosestSpaceObject();
         assertEquals(100.0, result.getDistanceFromEarth());
+    }
+
+    @Test
+    void testClosestSpaceObjectWithNoData() {
+        when(asteroidRepository.findAll()).thenReturn(List.of());
+        when(cometRepository.findAll()).thenReturn(List.of());
+
+        assertThrows(
+            IllegalStateException.class,
+            () -> spaceObjectService.returnClosestSpaceObject()
+        );
     }
 }
